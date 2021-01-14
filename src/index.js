@@ -1,17 +1,59 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import SeasonDisplay from './SeasonDisplay';
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+class App extends Component {
+	state = {
+		lat: null,
+		errorMsg: '',
+	};
+
+	componentDidMount() {
+		window.navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				this.setState({
+					lat: pos.coords.latitude,
+				});
+			}, //console.log(pos),
+			(err) => {
+				this.setState({
+					errorMsg: err.message,
+				});
+			}, //console.log(err),
+		);
+	}
+
+	renderContent() {
+		if (this.state.lat && !this.state.errorMsg) {
+			return (
+				<div>
+					<SeasonDisplay lat={this.state.lat} />
+				</div>
+			);
+		}
+
+		if (!this.state.lat && this.state.errorMsg) {
+			return (
+				<div>
+					<h3>Hi Seasons!!!</h3>
+					Error: {this.state.errorMsg}
+				</div>
+			);
+		}
+
+		return (
+			<div>
+				<div>
+					Loading Season <i className='spinner loading icon'></i>
+				</div>
+			</div>
+		);
+	}
+
+	render() {
+		return <div>{this.renderContent()}</div>;
+	}
+}
+
+ReactDOM.render(<App />, document.querySelector('#root'));
